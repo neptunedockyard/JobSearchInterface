@@ -46,6 +46,9 @@ namespace JobSearchInterface
 		private System.Windows.Forms.ColumnHeader descList;
 		private System.Windows.Forms.ColumnHeader urlList;
 		private System.Windows.Forms.CheckBox emailCheck;
+		private System.Windows.Forms.NumericUpDown numericLimit;
+		private System.Windows.Forms.Label label9;
+		private System.Windows.Forms.Label resultsLabel;
 		
 		/// <summary>
 		/// Disposes resources used by the form.
@@ -86,9 +89,9 @@ namespace JobSearchInterface
 			this.dateList = new System.Windows.Forms.ColumnHeader();
 			this.descList = new System.Windows.Forms.ColumnHeader();
 			this.urlList = new System.Windows.Forms.ColumnHeader();
-			this.debugTab = new System.Windows.Forms.TabPage();
-			this.debugText = new System.Windows.Forms.TextBox();
 			this.searchsettingsTab = new System.Windows.Forms.TabPage();
+			this.numericLimit = new System.Windows.Forms.NumericUpDown();
+			this.label9 = new System.Windows.Forms.Label();
 			this.jobtypeBox = new System.Windows.Forms.ComboBox();
 			this.label8 = new System.Windows.Forms.Label();
 			this.sitetypeBox = new System.Windows.Forms.ComboBox();
@@ -99,14 +102,18 @@ namespace JobSearchInterface
 			this.label5 = new System.Windows.Forms.Label();
 			this.cityText = new System.Windows.Forms.TextBox();
 			this.label4 = new System.Windows.Forms.Label();
+			this.debugTab = new System.Windows.Forms.TabPage();
+			this.debugText = new System.Windows.Forms.TextBox();
 			this.debugCheck = new System.Windows.Forms.CheckBox();
 			this.emailCheck = new System.Windows.Forms.CheckBox();
+			this.resultsLabel = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.numericPostAge)).BeginInit();
 			this.tabBox.SuspendLayout();
 			this.joblistTab.SuspendLayout();
-			this.debugTab.SuspendLayout();
 			this.searchsettingsTab.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericLimit)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericSearchRadius)).BeginInit();
+			this.debugTab.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// searchButton
@@ -266,30 +273,10 @@ namespace JobSearchInterface
 			this.urlList.Text = "URL";
 			this.urlList.Width = 250;
 			// 
-			// debugTab
-			// 
-			this.debugTab.Controls.Add(this.debugText);
-			this.debugTab.Location = new System.Drawing.Point(4, 22);
-			this.debugTab.Name = "debugTab";
-			this.debugTab.Padding = new System.Windows.Forms.Padding(3);
-			this.debugTab.Size = new System.Drawing.Size(559, 291);
-			this.debugTab.TabIndex = 1;
-			this.debugTab.Text = "Debug";
-			this.debugTab.UseVisualStyleBackColor = true;
-			// 
-			// debugText
-			// 
-			this.debugText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-			| System.Windows.Forms.AnchorStyles.Left) 
-			| System.Windows.Forms.AnchorStyles.Right)));
-			this.debugText.Location = new System.Drawing.Point(6, 6);
-			this.debugText.Multiline = true;
-			this.debugText.Name = "debugText";
-			this.debugText.Size = new System.Drawing.Size(547, 279);
-			this.debugText.TabIndex = 0;
-			// 
 			// searchsettingsTab
 			// 
+			this.searchsettingsTab.Controls.Add(this.numericLimit);
+			this.searchsettingsTab.Controls.Add(this.label9);
 			this.searchsettingsTab.Controls.Add(this.jobtypeBox);
 			this.searchsettingsTab.Controls.Add(this.label8);
 			this.searchsettingsTab.Controls.Add(this.sitetypeBox);
@@ -309,6 +296,37 @@ namespace JobSearchInterface
 			this.searchsettingsTab.TabIndex = 2;
 			this.searchsettingsTab.Text = "Search Settings";
 			this.searchsettingsTab.UseVisualStyleBackColor = true;
+			// 
+			// numericLimit
+			// 
+			this.numericLimit.Increment = new decimal(new int[] {
+			10,
+			0,
+			0,
+			0});
+			this.numericLimit.Location = new System.Drawing.Point(7, 192);
+			this.numericLimit.Maximum = new decimal(new int[] {
+			1000,
+			0,
+			0,
+			0});
+			this.numericLimit.Name = "numericLimit";
+			this.numericLimit.Size = new System.Drawing.Size(120, 20);
+			this.numericLimit.TabIndex = 18;
+			this.numericLimit.Value = new decimal(new int[] {
+			100,
+			0,
+			0,
+			0});
+			// 
+			// label9
+			// 
+			this.label9.Location = new System.Drawing.Point(7, 165);
+			this.label9.Name = "label9";
+			this.label9.Size = new System.Drawing.Size(100, 23);
+			this.label9.TabIndex = 17;
+			this.label9.Text = "Limit";
+			this.label9.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
 			// jobtypeBox
 			// 
@@ -482,6 +500,28 @@ namespace JobSearchInterface
 			this.label4.Text = "City";
 			this.label4.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
+			// debugTab
+			// 
+			this.debugTab.Controls.Add(this.debugText);
+			this.debugTab.Location = new System.Drawing.Point(4, 22);
+			this.debugTab.Name = "debugTab";
+			this.debugTab.Padding = new System.Windows.Forms.Padding(3);
+			this.debugTab.Size = new System.Drawing.Size(559, 291);
+			this.debugTab.TabIndex = 1;
+			this.debugTab.Text = "Debug";
+			this.debugTab.UseVisualStyleBackColor = true;
+			// 
+			// debugText
+			// 
+			this.debugText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			| System.Windows.Forms.AnchorStyles.Left) 
+			| System.Windows.Forms.AnchorStyles.Right)));
+			this.debugText.Location = new System.Drawing.Point(6, 6);
+			this.debugText.Multiline = true;
+			this.debugText.Name = "debugText";
+			this.debugText.Size = new System.Drawing.Size(547, 279);
+			this.debugText.TabIndex = 0;
+			// 
 			// debugCheck
 			// 
 			this.debugCheck.Location = new System.Drawing.Point(13, 276);
@@ -501,11 +541,20 @@ namespace JobSearchInterface
 			this.emailCheck.Text = "check for email";
 			this.emailCheck.UseVisualStyleBackColor = true;
 			// 
+			// resultsLabel
+			// 
+			this.resultsLabel.Location = new System.Drawing.Point(11, 146);
+			this.resultsLabel.Name = "resultsLabel";
+			this.resultsLabel.Size = new System.Drawing.Size(100, 23);
+			this.resultsLabel.TabIndex = 11;
+			this.resultsLabel.Text = "Results";
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(717, 341);
+			this.Controls.Add(this.resultsLabel);
 			this.Controls.Add(this.emailCheck);
 			this.Controls.Add(this.debugCheck);
 			this.Controls.Add(this.tabBox);
@@ -515,17 +564,20 @@ namespace JobSearchInterface
 			this.Controls.Add(this.searchProgress);
 			this.Controls.Add(this.searchQueryText);
 			this.Controls.Add(this.searchButton);
+			this.DoubleBuffered = true;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.MinimumSize = new System.Drawing.Size(733, 380);
 			this.Name = "MainForm";
 			this.Text = "JobSearchInterface";
 			((System.ComponentModel.ISupportInitialize)(this.numericPostAge)).EndInit();
 			this.tabBox.ResumeLayout(false);
 			this.joblistTab.ResumeLayout(false);
-			this.debugTab.ResumeLayout(false);
-			this.debugTab.PerformLayout();
 			this.searchsettingsTab.ResumeLayout(false);
 			this.searchsettingsTab.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericLimit)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericSearchRadius)).EndInit();
+			this.debugTab.ResumeLayout(false);
+			this.debugTab.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

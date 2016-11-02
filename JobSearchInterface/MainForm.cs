@@ -46,7 +46,7 @@ namespace JobSearchInterface
 			InitializeComponent();
 		}
 		
-		public IndeedQueryParameters collectParams() {
+		public IndeedQueryParameters collectParams(int start) {
 			var pams = new IndeedQueryParameters();
 			pams.Country = countryListAbr[countryCombo.SelectedIndex];
 			pams.FromAge = numericPostAge.Value.ToString();
@@ -58,8 +58,8 @@ namespace JobSearchInterface
 			
 			//some defaults
 			pams.Sort = "relevance";
-			pams.Start = "0";
-			pams.Limit = "100";
+			pams.Start = start.ToString();
+			pams.Limit = numericLimit.Value.ToString();
 			pams.Filter = "1";
 			pams.LatitudeLongitude = "1";
 			pams.Channel = "neptuneSearch";
@@ -112,27 +112,29 @@ namespace JobSearchInterface
 			if(!debugCheck.Checked)
 				debugText.Clear();
 			
-			qParameters = collectParams();
-			
 			try {
-				indeedResponse = IndeedSearch.GetSearchResults(qParameters, apiPublisherKey);
-//				MessageBox.Show("running");
-				int current = 0;
-				
-				foreach(var item in indeedResponse) {
-					string[] row = {item.JobTitle, item.Company, item.FormattedLocationFull, item.FormattedRelativeTime, item.Snippet, item.URL};
-					var listViewItem = new ListViewItem(row);
-					if(emailCheck.Checked) {
-						if(item.Snippet.Contains("@")) {
-							listViewItem.BackColor = Color.LightSteelBlue;
-//							jobListBox.Items[0].BackColor = Color.LightSteelBlue;
-						}
-					}
-					jobListBox.Items.Add(listViewItem);
+				for(int index = 0; index < numericLimit.Value; index+=25) {
+					qParameters = collectParams(index);
+					indeedResponse = IndeedSearch.GetSearchResults(qParameters, apiPublisherKey);
+	//				MessageBox.Show("running");
+					int current = 0;
 					
-					current++;
-					searchProgress.Value = current / indeedResponse.Count * 100;
+					foreach(var item in indeedResponse) {
+						string[] row = {item.JobTitle, item.Company, item.FormattedLocationFull, item.FormattedRelativeTime, item.Snippet, item.URL};
+						var listViewItem = new ListViewItem(row);
+						if(emailCheck.Checked) {
+							if(item.Snippet.Contains("@")) {
+								listViewItem.BackColor = Color.LightSteelBlue;
+							}
+						}
+						jobListBox.Items.Add(listViewItem);
+						
+						current++;
+						searchProgress.Value = current / indeedResponse.Count * 100;
+					}
+					resultsLabel.Text = index.ToString();
 				}
+			
 //				MessageBox.Show(indeedResponse.Count.ToString());
 			} catch (Exception ex) {
 //				MessageBox.Show("error: " + ex.Message);
