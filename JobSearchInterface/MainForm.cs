@@ -59,7 +59,7 @@ namespace JobSearchInterface
 			//some defaults
 			pams.Sort = "relevance";
 			pams.Start = "0";
-			pams.Limit = "10";
+			pams.Limit = "100";
 			pams.Filter = "1";
 			pams.LatitudeLongitude = "1";
 			pams.Channel = "neptuneSearch";
@@ -122,13 +122,21 @@ namespace JobSearchInterface
 				foreach(var item in indeedResponse) {
 					string[] row = {item.JobTitle, item.Company, item.FormattedLocationFull, item.FormattedRelativeTime, item.Snippet, item.URL};
 					var listViewItem = new ListViewItem(row);
+					if(emailCheck.Checked) {
+						if(item.Snippet.Contains("@")) {
+							listViewItem.BackColor = Color.LightSteelBlue;
+//							jobListBox.Items[0].BackColor = Color.LightSteelBlue;
+						}
+					}
 					jobListBox.Items.Add(listViewItem);
+					
 					current++;
 					searchProgress.Value = current / indeedResponse.Count * 100;
 				}
 //				MessageBox.Show(indeedResponse.Count.ToString());
 			} catch (Exception ex) {
-				MessageBox.Show("error: " + ex.Message);
+//				MessageBox.Show("error: " + ex.Message);
+				MessageBox.Show("No results for this query");
 			}
 		}
 		
@@ -143,7 +151,7 @@ namespace JobSearchInterface
 		void JobListBoxMouseDoubleClick(object sender, MouseEventArgs e)
 		{
 //			MessageBox.Show("Clicked: " + jobListBox.SelectedItems[0].Text + " url: " + jobListBox.Items[0].SubItems[5].Text);
-			System.Diagnostics.Process.Start(jobListBox.Items[0].SubItems[5].Text);
+			System.Diagnostics.Process.Start(jobListBox.SelectedItems[0].SubItems[5].Text);
 		}
 	}
 }

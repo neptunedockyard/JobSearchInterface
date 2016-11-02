@@ -45,6 +45,7 @@ namespace JobSearchInterface
 		private System.Windows.Forms.ColumnHeader dateList;
 		private System.Windows.Forms.ColumnHeader descList;
 		private System.Windows.Forms.ColumnHeader urlList;
+		private System.Windows.Forms.CheckBox emailCheck;
 		
 		/// <summary>
 		/// Disposes resources used by the form.
@@ -67,6 +68,7 @@ namespace JobSearchInterface
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.searchButton = new System.Windows.Forms.Button();
 			this.searchQueryText = new System.Windows.Forms.TextBox();
 			this.searchProgress = new System.Windows.Forms.ProgressBar();
@@ -98,6 +100,7 @@ namespace JobSearchInterface
 			this.cityText = new System.Windows.Forms.TextBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.debugCheck = new System.Windows.Forms.CheckBox();
+			this.emailCheck = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.numericPostAge)).BeginInit();
 			this.tabBox.SuspendLayout();
 			this.joblistTab.SuspendLayout();
@@ -489,11 +492,21 @@ namespace JobSearchInterface
 			this.debugCheck.UseVisualStyleBackColor = true;
 			this.debugCheck.CheckedChanged += new System.EventHandler(this.DebugCheckCheckedChanged);
 			// 
+			// emailCheck
+			// 
+			this.emailCheck.Location = new System.Drawing.Point(13, 257);
+			this.emailCheck.Name = "emailCheck";
+			this.emailCheck.Size = new System.Drawing.Size(104, 24);
+			this.emailCheck.TabIndex = 10;
+			this.emailCheck.Text = "check for email";
+			this.emailCheck.UseVisualStyleBackColor = true;
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(717, 341);
+			this.Controls.Add(this.emailCheck);
 			this.Controls.Add(this.debugCheck);
 			this.Controls.Add(this.tabBox);
 			this.Controls.Add(this.label3);
@@ -502,6 +515,7 @@ namespace JobSearchInterface
 			this.Controls.Add(this.searchProgress);
 			this.Controls.Add(this.searchQueryText);
 			this.Controls.Add(this.searchButton);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "MainForm";
 			this.Text = "JobSearchInterface";
 			((System.ComponentModel.ISupportInitialize)(this.numericPostAge)).EndInit();
