@@ -196,8 +196,8 @@ namespace JobSearchInterface
 			| System.Windows.Forms.AnchorStyles.Left) 
 			| System.Windows.Forms.AnchorStyles.Right)));
 			this.tabBox.Controls.Add(this.joblistTab);
-			this.tabBox.Controls.Add(this.debugTab);
 			this.tabBox.Controls.Add(this.searchsettingsTab);
+			this.tabBox.Controls.Add(this.debugTab);
 			this.tabBox.Location = new System.Drawing.Point(138, 12);
 			this.tabBox.Name = "tabBox";
 			this.tabBox.SelectedIndex = 0;
@@ -240,7 +240,7 @@ namespace JobSearchInterface
 			// jobTitleList
 			// 
 			this.jobTitleList.Text = "Title";
-			this.jobTitleList.Width = 115;
+			this.jobTitleList.Width = 145;
 			// 
 			// companyList
 			// 
@@ -250,7 +250,7 @@ namespace JobSearchInterface
 			// cityList
 			// 
 			this.cityList.Text = "City";
-			this.cityList.Width = 68;
+			this.cityList.Width = 75;
 			// 
 			// dateList
 			// 
@@ -259,12 +259,12 @@ namespace JobSearchInterface
 			// descList
 			// 
 			this.descList.Text = "Snippet";
-			this.descList.Width = 159;
+			this.descList.Width = 250;
 			// 
 			// urlList
 			// 
 			this.urlList.Text = "URL";
-			this.urlList.Width = 243;
+			this.urlList.Width = 250;
 			// 
 			// debugTab
 			// 
