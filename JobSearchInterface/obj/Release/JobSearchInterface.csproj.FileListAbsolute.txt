@@ -1,0 +1,8 @@
+C:\Users\Michal\Documents\SharpDevelop Projects\JobSearchInterface\JobSearchInterface\bin\Release\Jobula.exe.config
+C:\Users\Michal\Documents\SharpDevelop Projects\JobSearchInterface\JobSearchInterface\bin\Release\Jobula.exe
+C:\Users\Michal\Documents\SharpDevelop Projects\JobSearchInterface\JobSearchInterface\bin\Release\Indeed.dll
+C:\Users\Michal\Documents\SharpDevelop Projects\JobSearchInterface\JobSearchInterface\bin\Release\Indeed.pdb
+C:\Users\Michal\Documents\SharpDevelop Projects\JobSearchInterface\JobSearchInterface\obj\Release\JobSearchInterface.MainForm.resources
+C:\Users\Michal\Documents\SharpDevelop Projects\JobSearchInterface\JobSearchInterface\obj\Release\JobSearchInterface.csproj.GenerateResource.Cache
+C:\Users\Michal\Documents\SharpDevelop Projects\JobSearchInterface\JobSearchInterface\obj\Release\Jobula.exe
+C:\Users\Michal\Documents\SharpDevelop Projects\JobSearchInterface\JobSearchInterface\obj\Release\JobSearchInterface.csprojResolveAssemblyReference.cache

@@ -7,11 +7,16 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Indeed.Models;
 using Indeed;
+using System.IO;
+using System.Diagnostics;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace JobSearchInterface
 {
@@ -26,6 +31,8 @@ namespace JobSearchInterface
 	/// </summary>
 	public partial class MainForm : Form
 	{
+		private bool developer_mode = false;
+		
 		private static string[] countryListAbr = {
 			"aq", "ar",	"au", "at", "bh", "be",	"br", "ca", "cl", "cn", "co", "cr",
 			"cz", "dk", "ec", "eg", "fi", "fr", "de", "gr",	"hk", "hu", "in", "id",
@@ -38,12 +45,29 @@ namespace JobSearchInterface
 		private const string apiPublisherKey = "444457643170882";
 		public IndeedQueryParameters qParameters = new IndeedQueryParameters();
 		public List<IndeedSearchResult> indeedResponse = new List<IndeedSearchResult>();
+		private SaveFileDialog savefileRemember = new SaveFileDialog();
+		private ListViewItemComparer sorter;
 		
 		public MainForm()
 		{
 //			qParameters = new IndeedQueryParameters();
 //			indeedResponse = new List<IndeedSearchResult>();
 			InitializeComponent();
+			
+			//init boxes
+			jobsiteCombo.SelectedIndex = 0;
+			countryCombo.SelectedIndex = 0;
+			sitetypeBox.SelectedIndex = 0;
+			jobtypeBox.SelectedIndex = 0;
+			
+			//check for debug mode
+			if(!developer_mode) {
+				debugCheck.Visible = false;
+				tabBox.TabPages.Remove(debugTab);
+			}
+			
+			sorter = new ListViewItemComparer();
+			jobListBox.ListViewItemSorter = sorter;
 		}
 		
 		public IndeedQueryParameters collectParams(int start) {
@@ -93,6 +117,10 @@ namespace JobSearchInterface
 			 * boxes. This includes the age of the postings, the specific title,
 			 * the country, radius, etc.
 			 */
+			if(jobsiteCombo.SelectedIndex < 0) {
+				MessageBox.Show("Please choose a search site");
+				return;
+			}
 			
 			if(countryCombo.SelectedIndex < 0) {
 				MessageBox.Show("Please choose all options");
@@ -107,39 +135,57 @@ namespace JobSearchInterface
 				return;
 			}
 			
+			//disable search button to prevent multiple clicks
+			searchButton.Enabled = false;
+			
 			searchProgress.Value = 0;
 			jobListBox.Items.Clear();
 			if(!debugCheck.Checked)
 				debugText.Clear();
 			
-			try {
-				for(int index = 0; index < numericLimit.Value; index+=25) {
-					qParameters = collectParams(index);
-					indeedResponse = IndeedSearch.GetSearchResults(qParameters, apiPublisherKey);
-	//				MessageBox.Show("running");
-					int current = 0;
-					
-					foreach(var item in indeedResponse) {
-						string[] row = {item.JobTitle, item.Company, item.FormattedLocationFull, item.FormattedRelativeTime, item.Snippet, item.URL};
-						var listViewItem = new ListViewItem(row);
-						if(emailCheck.Checked) {
-							if(item.Snippet.Contains("@")) {
-								listViewItem.BackColor = Color.LightSteelBlue;
-							}
-						}
-						jobListBox.Items.Add(listViewItem);
-						
-						current++;
-						searchProgress.Value = current / indeedResponse.Count * 100;
-					}
-					resultsLabel.Text = index.ToString();
-				}
+			int total = 0;
 			
-//				MessageBox.Show(indeedResponse.Count.ToString());
-			} catch (Exception ex) {
-//				MessageBox.Show("error: " + ex.Message);
-				MessageBox.Show("No results for this query");
+			if(jobsiteCombo.SelectedItem.ToString() == "Indeed") {
+				try {
+					for(int index = 0; index < numericLimit.Value; index+=25) {
+						qParameters = collectParams(index);
+						indeedResponse = IndeedSearch.GetSearchResults(qParameters, apiPublisherKey);
+		//				MessageBox.Show("indeed");
+						int current = 0;
+						
+						jobListBox.BeginUpdate();
+						foreach(var item in indeedResponse) {
+							//TODO original row generator, ran into some issues with exporting where
+							//natural commas will cause csv file to render wrong, so trying to 
+							//eliminate commas with spaces
+//							string[] row = {item.JobTitle, item.Company, item.FormattedLocationFull, item.FormattedRelativeTime, item.Snippet, item.URL};
+							string[] row = {item.JobTitle.Replace(","," "), item.Company.Replace(","," "), item.FormattedLocationFull.Replace(","," "), item.FormattedRelativeTime.Replace(","," "), item.Snippet.Replace(","," "), item.URL};
+							var listViewItem = new ListViewItem(row);
+							if(emailCheck.Checked) {
+								if(item.Snippet.Contains("@")) {
+									listViewItem.BackColor = Color.LightSteelBlue;
+								}
+							}
+							jobListBox.Items.Add(listViewItem);
+							
+							total++;
+							current++;
+							searchProgress.Value = current / indeedResponse.Count * 100;
+						}
+						jobListBox.EndUpdate();
+						resultsLabel.Text = "Results: " + total;
+						if(indeedResponse.Count < 20) break;
+					}
+				
+	//				MessageBox.Show(indeedResponse.Count.ToString());
+				} catch (Exception ex) {
+	//				MessageBox.Show("error: " + ex.Message);
+					MessageBox.Show("No results for this query");
+				}
 			}
+			
+			searchButton.Enabled = true;
+			tabBox.SelectTab(joblistTab);
 		}
 		
 		void DebugCheckCheckedChanged(object sender, EventArgs e)
@@ -152,8 +198,295 @@ namespace JobSearchInterface
 		}
 		void JobListBoxMouseDoubleClick(object sender, MouseEventArgs e)
 		{
-//			MessageBox.Show("Clicked: " + jobListBox.SelectedItems[0].Text + " url: " + jobListBox.Items[0].SubItems[5].Text);
-			System.Diagnostics.Process.Start(jobListBox.SelectedItems[0].SubItems[5].Text);
+			Process.Start(jobListBox.SelectedItems[0].SubItems[5].Text);
 		}
+		
+		void exportToCSV(object sender, EventArgs e)
+		{
+			
+			var savefile = new SaveFileDialog();
+			savefile.FileName = searchQueryText.Text + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".csv";
+			savefile.Filter = "CSV file (*.csv)|*.csv";
+			if(savefile.ShowDialog() == DialogResult.OK) {
+				using (var sw = new StreamWriter(savefile.FileName))
+					for(int idx = 0; idx < jobListBox.Items.Count; idx++) {
+//					sw.WriteLine(jobListBox.Items[idx].SubItems[0].Text.Replace(";",",")+";"+jobListBox.Items[idx].SubItems[1].Text.Replace(";",",")+";"+jobListBox.Items[idx].SubItems[2].Text.Replace(";",",")+";"+jobListBox.Items[idx].SubItems[3].Text.Replace(";",",")+";"+jobListBox.Items[idx].SubItems[4].Text.Replace(";",",")+";"+jobListBox.Items[idx].SubItems[5].Text.Replace(";",","));
+					sw.WriteLine(jobListBox.Items[idx].SubItems[0].Text+","+jobListBox.Items[idx].SubItems[1].Text+","+jobListBox.Items[idx].SubItems[2].Text+","+jobListBox.Items[idx].SubItems[3].Text+","+jobListBox.Items[idx].SubItems[4].Text+","+"=HYPERLINK(\""+jobListBox.Items[idx].SubItems[5].Text+"\")");
+				}
+			} else {
+				return;
+			}
+			var path = Path.GetFullPath(savefile.FileName);
+			var pathDir = Path.GetDirectoryName(savefile.FileName);
+			
+			MessageBox.Show("Export complete");
+		}
+		
+		void showAboutBox(object sender, EventArgs e)
+		{
+			MessageBox.Show("Jobula Search Tool\r\nVersion: 2.4.3\r\nAuthor: neptuneDockyard");
+		}
+		
+		void applicationClose(object sender, EventArgs e)
+		{
+			System.Environment.Exit(1);
+		}
+		
+		void newQuery(object sender, EventArgs e)
+		{
+			jobsiteCombo.SelectedIndex = 0;
+			searchQueryText.Text = "";
+			cityText.Text = "";
+			countryCombo.SelectedIndex = 0;
+			numericPostAge.Value = 30;
+			numericSearchRadius.Value = 25;
+			sitetypeBox.SelectedIndex = 0;
+			jobtypeBox.SelectedIndex = 0;
+		}
+		
+		void openQuery(object sender, EventArgs e)
+		{
+			var openfile = new OpenFileDialog();
+			openfile.Title = "Open query file";
+			openfile.Filter = "Text file (*.txt)|*.txt";
+			if(openfile.ShowDialog() == DialogResult.OK) {
+				var filename = openfile.FileName;
+				string filecontent = File.ReadAllText(filename);
+				string[] splitcontent = filecontent.Split(';');
+				if(splitcontent[8].Contains("neptune")) {
+					jobsiteCombo.SelectedItem = splitcontent[0];
+					searchQueryText.Text = splitcontent[1];
+					cityText.Text = splitcontent[2];
+					countryCombo.SelectedItem = splitcontent[3];
+					numericPostAge.Value = Int32.Parse(splitcontent[4]);
+					numericSearchRadius.Value = Int32.Parse(splitcontent[5]);
+					sitetypeBox.SelectedItem = splitcontent[6];
+					jobtypeBox.SelectedItem = splitcontent[7];
+				} else {
+					MessageBox.Show("Error: invalid query file");
+				}
+			}
+		}
+		
+		void saveQuery(object sender, EventArgs e)
+		{
+			if (string.IsNullOrEmpty(savefileRemember.FileName))
+			{
+				var savefile = new SaveFileDialog();
+				savefile.FileName = searchQueryText.Text + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt";
+				savefile.Filter = "Text file (*.txt)|*.txt";
+				if(savefile.ShowDialog() == DialogResult.OK) {
+					savefileRemember = savefile;
+					using (var sw = new StreamWriter(savefile.FileName)) {
+						sw.WriteLine(jobsiteCombo.SelectedItem+";"+searchQueryText.Text+";"+cityText.Text+";"+countryCombo.SelectedItem+";"+numericPostAge.Value.ToString()+";"+numericSearchRadius.Value.ToString()+";"+sitetypeBox.SelectedItem.ToString()+";"+jobtypeBox.SelectedItem.ToString()+";"+"neptune");
+					}
+				} else {
+					return;
+				}
+			} 
+			else 
+			{
+			    using (StreamWriter sw = File.AppendText(Path.GetFullPath(savefileRemember.FileName))) 
+			    {
+					sw.WriteLine(jobsiteCombo.SelectedItem+";"+searchQueryText.Text+";"+cityText.Text+";"+countryCombo.SelectedItem+";"+numericPostAge.Value.ToString()+";"+numericSearchRadius.Value.ToString()+";"+sitetypeBox.SelectedItem.ToString()+";"+jobtypeBox.SelectedItem.ToString()+";"+"neptune");
+			    }
+			}
+		}
+		
+		void saveAsQuery(object sender, EventArgs e)
+		{
+			var savefile = new SaveFileDialog();
+			savefile.FileName = searchQueryText.Text + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt";
+			savefile.Filter = "Text file (*.txt)|*.txt";
+			if(savefile.ShowDialog() == DialogResult.OK) {
+				savefileRemember = savefile;
+				using (var sw = new StreamWriter(savefile.FileName)) {
+					sw.WriteLine(jobsiteCombo.SelectedItem+";"+searchQueryText.Text+";"+cityText.Text+";"+countryCombo.SelectedItem+";"+numericPostAge.Value.ToString()+";"+numericSearchRadius.Value.ToString()+";"+sitetypeBox.SelectedItem.ToString()+";"+jobtypeBox.SelectedItem.ToString()+";"+"neptune");
+				}
+			} else {
+				return;
+			}
+			var path = Path.GetFullPath(savefile.FileName);
+			var pathDir = Path.GetDirectoryName(savefile.FileName);
+			
+			MessageBox.Show("Saved");
+		}
+		
+		void selectAllList(object sender, EventArgs e)
+		{
+			jobListBox.BeginUpdate();
+			tabBox.SelectTab(joblistTab);
+			jobListBox.Focus();
+			
+			foreach(ListViewItem item in jobListBox.Items) {
+				item.Selected = true;
+			}
+			
+			jobListBox.EndUpdate();
+			jobListBox.Focus();
+		}
+		
+		void copyallList(object sender, EventArgs e)
+		{
+			tabBox.SelectTab(joblistTab);
+			jobListBox.Focus();
+			
+			var builder = new StringBuilder();
+			builder.AppendLine("");
+	        foreach (ListViewItem item in jobListBox.SelectedItems)
+	            //builder.AppendLine(item.SubItems[0].Text.Replace(";",",")+";"+item.SubItems[1].Text.Replace(";",",")+";"+item.SubItems[2].Text.Replace(";",",")+";"+item.SubItems[3].Text.Replace(";",",")+";"+item.SubItems[4].Text.Replace(";",",")+";"+item.SubItems[5].Text.Replace(";",","));
+	        	builder.AppendLine(item.SubItems[0].Text+","+item.SubItems[1].Text+","+item.SubItems[2].Text+","+item.SubItems[3].Text+","+item.SubItems[4].Text+","+"=HYPERLINK(\""+item.SubItems[5].Text+"\")");
+	        Clipboard.SetText(builder.ToString());
+		}
+		
+		void listviewColumnSort(object sender, ColumnClickEventArgs e)
+		{
+			if (e.Column != sorter.SortColumn)
+	        {
+	            // Set the sort column to the new column.
+	            sorter.SortColumn = e.Column;
+	            // Set the sort order to ascending by default.
+	            sorter.Order = SortOrder.Ascending;
+	        } else {
+	            // Determine what the last sort order was and change it.
+	            if (sorter.Order == SortOrder.Ascending)
+	                sorter.Order = SortOrder.Descending;
+	            else
+	                sorter.Order = SortOrder.Ascending;
+	        }
+			
+	        // Call the sort method to manually sort.
+	        jobListBox.Sort();
+		}
+		
+		void sendEnterKey(object sender, KeyEventArgs e)
+		{
+			if(e.KeyCode == Keys.Enter) {
+				searchButton.PerformClick();
+				e.SuppressKeyPress = true;
+				e.Handled = true;
+			}
+		}
+	}
+	
+    // This class is an implementation of the 'IComparer' interface.
+	public class ListViewItemComparer : IComparer
+	{
+	    // Specifies the column to be sorted
+	    private int ColumnToSort;
+	
+	    // Specifies the order in which to sort (i.e. 'Ascending').
+	    private SortOrder OrderOfSort;
+	
+	    // Case insensitive comparer object
+	    private CaseInsensitiveComparer ObjectCompare;
+	
+	    // Class constructor, initializes various elements
+	    public ListViewItemComparer()
+	    {
+	        // Initialize the column to '0'
+	        ColumnToSort = 0;
+	
+	        // Initialize the sort order to 'none'
+	        OrderOfSort = SortOrder.None;
+	
+	        // Initialize the CaseInsensitiveComparer object
+	        ObjectCompare = new CaseInsensitiveComparer();
+	    }
+	
+	    // This method is inherited from the IComparer interface.
+	    // It compares the two objects passed using a case
+	    // insensitive comparison.
+	    //
+	    // x: First object to be compared
+	    // y: Second object to be compared
+	    //
+	    // The result of the comparison. "0" if equal,
+	    // negative if 'x' is less than 'y' and
+	    // positive if 'x' is greater than 'y'
+	    public int Compare(object x, object y)
+	    {
+	        int compareResult;
+	        ListViewItem listviewX, listviewY;
+	        
+	        // regex for removing characters from numeric compare
+	        Regex rgx = new Regex("[^0-9]");
+	
+	        // Cast the objects to be compared to ListViewItem objects
+	        listviewX = (ListViewItem)x;
+	        listviewY = (ListViewItem)y;
+	
+	        // Case insensitive Compare
+	        if(ColumnToSort != 3) {
+		        compareResult = ObjectCompare.Compare (
+		            listviewX.SubItems[ColumnToSort].Text,
+		            listviewY.SubItems[ColumnToSort].Text
+		        );
+	        } else {
+//	        	if(listviewX.SubItems[ColumnToSort].Text.Contains("hours")) {
+//	        		listviewX.SubItems[ColumnToSort].Text = ((float)(Int32.Parse(rgx.Replace(listviewX.SubItems[ColumnToSort].Text,""))/24)).ToString();
+//	        	}
+//	        	if(listviewY.SubItems[ColumnToSort].Text.Contains("hours")) {
+//	        		listviewY.SubItems[ColumnToSort].Text = ((float)(Int32.Parse(rgx.Replace(listviewY.SubItems[ColumnToSort].Text,""))/24)).ToString();
+//	        	}
+	        	if(listviewX.SubItems[ColumnToSort].Text.Contains("hours") && !listviewY.SubItems[ColumnToSort].Text.Contains("hours")) {
+	        		compareResult = ObjectCompare.Compare (
+	        			(float)(Int32.Parse(rgx.Replace(listviewX.SubItems[ColumnToSort].Text,""))/100),
+	        			(float)Int32.Parse(rgx.Replace(listviewY.SubItems[ColumnToSort].Text,""))
+			        );
+	        	} else if(listviewY.SubItems[ColumnToSort].Text.Contains("hours") && !listviewX.SubItems[ColumnToSort].Text.Contains("hours")) {
+	        		compareResult = ObjectCompare.Compare (
+	        			(float)Int32.Parse(rgx.Replace(listviewX.SubItems[ColumnToSort].Text,"")),
+	        			(float)(Int32.Parse(rgx.Replace(listviewY.SubItems[ColumnToSort].Text,""))/100)
+			        );
+	        	} else if(listviewX.SubItems[ColumnToSort].Text.Contains("hours") && listviewY.SubItems[ColumnToSort].Text.Contains("hours")) {
+	        		compareResult = ObjectCompare.Compare (
+	        			Int32.Parse(rgx.Replace(listviewX.SubItems[ColumnToSort].Text,"")),
+	        			Int32.Parse(rgx.Replace(listviewY.SubItems[ColumnToSort].Text,""))
+			        );
+	        	} else {
+		        	compareResult = ObjectCompare.Compare (
+		        		Int32.Parse(rgx.Replace(listviewX.SubItems[ColumnToSort].Text,"")),
+		        		Int32.Parse(rgx.Replace(listviewY.SubItems[ColumnToSort].Text,""))
+			        );
+	        	}
+	        }
+	
+	        // Calculate correct return value based on object comparison
+	        if (OrderOfSort == SortOrder.Ascending) {
+	            // Ascending sort is selected, return normal result of compare operation
+	            return compareResult;
+	        } else if (OrderOfSort == SortOrder.Descending) {
+	            // Descending sort is selected, return negative result of compare operation
+	            return (-compareResult);
+	        } else {
+	            // Return '0' to indicate they are equal
+	            return 0;
+	        }
+	    }
+	    
+	    // Gets or sets the number of the column to which to
+	    // apply the sorting operation (Defaults to '0').
+	    public int SortColumn
+	    {
+	        set {
+	            ColumnToSort = value;
+	        }
+	        get {
+	            return ColumnToSort;
+	        }
+	    }
+	
+	    // Gets or sets the order of sorting to apply
+	    // (for example, 'Ascending' or 'Descending').
+	    public SortOrder Order
+	    {
+	        set {
+	            OrderOfSort = value;
+	        }
+	        get {
+	            return OrderOfSort;
+	        }
+	    }
 	}
 }
