@@ -31,7 +31,9 @@ namespace JobSearchInterface
 	/// </summary>
 	public partial class MainForm : Form
 	{
+		private const string appVersion = "2.5.3";
 		private bool developer_mode = false;
+		private bool demo_mode = false;
 		
 		private static string[] countryListAbr = {
 			"aq", "ar",	"au", "at", "bh", "be",	"br", "ca", "cl", "cn", "co", "cr",
@@ -54,16 +56,28 @@ namespace JobSearchInterface
 //			indeedResponse = new List<IndeedSearchResult>();
 			InitializeComponent();
 			
+			//show version number
+			this.Text += " v" + appVersion;
+			
 			//init boxes
 			jobsiteCombo.SelectedIndex = 0;
-			countryCombo.SelectedIndex = 0;
-			sitetypeBox.SelectedIndex = 0;
+			countryCombo.SelectedIndex = 7;
+			sitetypeBox.SelectedIndex = 1;
 			jobtypeBox.SelectedIndex = 0;
 			
 			//check for debug mode
 			if(!developer_mode) {
 				debugCheck.Visible = false;
 				tabBox.TabPages.Remove(debugTab);
+			}
+			
+			//check for demo mode
+			if(demo_mode) {
+				numericPostAge.Maximum = 5;
+				numericLimit.Maximum = 10;
+				numericSearchRadius.Maximum = 25;
+				emailCheck.Enabled = false;
+				this.Text += " Demo";
 			}
 			
 			sorter = new ListViewItemComparer();
@@ -121,9 +135,8 @@ namespace JobSearchInterface
 				MessageBox.Show("Please choose a search site");
 				return;
 			}
-			
 			if(countryCombo.SelectedIndex < 0) {
-				MessageBox.Show("Please choose all options");
+				MessageBox.Show("Please choose a country");
 				return;
 			}
 			if(sitetypeBox.SelectedIndex < 0) {
@@ -132,6 +145,10 @@ namespace JobSearchInterface
 			}
 			if(jobtypeBox.SelectedIndex < 0) {
 				MessageBox.Show("Please choose all options");
+				return;
+			}
+			if(string.IsNullOrEmpty(cityText.Text)) {
+				MessageBox.Show("Please enter city");
 				return;
 			}
 			
@@ -144,14 +161,15 @@ namespace JobSearchInterface
 				debugText.Clear();
 			
 			int total = 0;
+			int totalresponse = 0;
 			
 			if(jobsiteCombo.SelectedItem.ToString() == "Indeed") {
 				try {
 					for(int index = 0; index < numericLimit.Value; index+=25) {
 						qParameters = collectParams(index);
 						indeedResponse = IndeedSearch.GetSearchResults(qParameters, apiPublisherKey);
-		//				MessageBox.Show("indeed");
 						int current = 0;
+						totalresponse += indeedResponse.Count;
 						
 						jobListBox.BeginUpdate();
 						foreach(var item in indeedResponse) {
@@ -170,17 +188,20 @@ namespace JobSearchInterface
 							
 							total++;
 							current++;
-							searchProgress.Value = current / indeedResponse.Count * 100;
+							//searchProgress.Value = current / indeedResponse.Count * 100;
+							searchProgress.Value = total / totalresponse * 100;
 						}
 						jobListBox.EndUpdate();
 						resultsLabel.Text = "Results: " + total;
-						if(indeedResponse.Count < 20) break;
+						if(indeedResponse.Count < 25) break;
 					}
-				
-	//				MessageBox.Show(indeedResponse.Count.ToString());
 				} catch (Exception ex) {
 	//				MessageBox.Show("error: " + ex.Message);
 					MessageBox.Show("No results for this query");
+					resultsLabel.Text = "Results: 0";
+					//switch to tab
+					tabBox.SelectTab(searchsettingsTab);
+					return;
 				}
 			}
 			
@@ -205,7 +226,8 @@ namespace JobSearchInterface
 		{
 			
 			var savefile = new SaveFileDialog();
-			savefile.FileName = searchQueryText.Text + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".csv";
+			var filename = searchQueryText.Text.Replace("\"",string.Empty);
+			savefile.FileName = filename + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".csv";
 			savefile.Filter = "CSV file (*.csv)|*.csv";
 			if(savefile.ShowDialog() == DialogResult.OK) {
 				using (var sw = new StreamWriter(savefile.FileName))
@@ -224,7 +246,7 @@ namespace JobSearchInterface
 		
 		void showAboutBox(object sender, EventArgs e)
 		{
-			MessageBox.Show("Jobula Search Tool\r\nVersion: 2.4.3\r\nAuthor: neptuneDockyard");
+			MessageBox.Show("Jobula Search Tool\r\nVersion: 2.5.3\r\nAuthor: neptuneDockyard", "About");
 		}
 		
 		void applicationClose(object sender, EventArgs e)
@@ -237,11 +259,14 @@ namespace JobSearchInterface
 			jobsiteCombo.SelectedIndex = 0;
 			searchQueryText.Text = "";
 			cityText.Text = "";
-			countryCombo.SelectedIndex = 0;
+			countryCombo.SelectedIndex = 7;
 			numericPostAge.Value = 30;
 			numericSearchRadius.Value = 25;
-			sitetypeBox.SelectedIndex = 0;
+			sitetypeBox.SelectedIndex = 1;
 			jobtypeBox.SelectedIndex = 0;
+			
+			//switch to tab
+			tabBox.SelectTab(searchsettingsTab);
 		}
 		
 		void openQuery(object sender, EventArgs e)
@@ -253,19 +278,26 @@ namespace JobSearchInterface
 				var filename = openfile.FileName;
 				string filecontent = File.ReadAllText(filename);
 				string[] splitcontent = filecontent.Split(';');
-				if(splitcontent[8].Contains("neptune")) {
-					jobsiteCombo.SelectedItem = splitcontent[0];
-					searchQueryText.Text = splitcontent[1];
-					cityText.Text = splitcontent[2];
-					countryCombo.SelectedItem = splitcontent[3];
-					numericPostAge.Value = Int32.Parse(splitcontent[4]);
-					numericSearchRadius.Value = Int32.Parse(splitcontent[5]);
-					sitetypeBox.SelectedItem = splitcontent[6];
-					jobtypeBox.SelectedItem = splitcontent[7];
+				if(splitcontent.Length == 9) {
+					if(splitcontent[8].Contains("neptune")) {
+						jobsiteCombo.SelectedItem = splitcontent[0];
+						searchQueryText.Text = splitcontent[1];
+						cityText.Text = splitcontent[2];
+						countryCombo.SelectedItem = splitcontent[3];
+						numericPostAge.Value = Int32.Parse(splitcontent[4]);
+						numericSearchRadius.Value = Int32.Parse(splitcontent[5]);
+						sitetypeBox.SelectedItem = splitcontent[6];
+						jobtypeBox.SelectedItem = splitcontent[7];
+					} else {
+						MessageBox.Show("Error: invalid query file");
+					}
 				} else {
 					MessageBox.Show("Error: invalid query file");
 				}
 			}
+			
+			//switch to tab
+			tabBox.SelectTab(searchsettingsTab);
 		}
 		
 		void saveQuery(object sender, EventArgs e)
@@ -296,7 +328,8 @@ namespace JobSearchInterface
 		void saveAsQuery(object sender, EventArgs e)
 		{
 			var savefile = new SaveFileDialog();
-			savefile.FileName = searchQueryText.Text + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt";
+			var filename = searchQueryText.Text.Replace("\"",string.Empty);
+			savefile.FileName = filename + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt";
 			savefile.Filter = "Text file (*.txt)|*.txt";
 			if(savefile.ShowDialog() == DialogResult.OK) {
 				savefileRemember = savefile;
@@ -367,6 +400,17 @@ namespace JobSearchInterface
 				e.Handled = true;
 			}
 		}
+		
+		void howtouseHelp(object sender, EventArgs e)
+		{
+			MessageBox.Show("This tool allows you to easily search popular job portals.\r\n" +
+			                "For the best search results, the following can be used:\r\n" +
+			                "specific strings: ex. \"civil engineer\"\r\n" +
+			                "inclusive strings: ex. +technician\r\n" +
+			                "exclusive strings: ex. -manager\r\n\r\n" +
+			                "To expand an ad, double click it to open in a browser.",
+			               "How to use this tool.");
+		}
 	}
 	
     // This class is an implementation of the 'IComparer' interface.
@@ -408,9 +452,10 @@ namespace JobSearchInterface
 	    {
 	        int compareResult;
 	        ListViewItem listviewX, listviewY;
+	        var time_words = new Regex("hour|stunden|Stunden|heur|時間|小时|小時|horas");
 	        
 	        // regex for removing characters from numeric compare
-	        Regex rgx = new Regex("[^0-9]");
+	        var rgx = new Regex("[^0-9]");
 	
 	        // Cast the objects to be compared to ListViewItem objects
 	        listviewX = (ListViewItem)x;
@@ -422,24 +467,18 @@ namespace JobSearchInterface
 		            listviewX.SubItems[ColumnToSort].Text,
 		            listviewY.SubItems[ColumnToSort].Text
 		        );
-	        } else {
-//	        	if(listviewX.SubItems[ColumnToSort].Text.Contains("hours")) {
-//	        		listviewX.SubItems[ColumnToSort].Text = ((float)(Int32.Parse(rgx.Replace(listviewX.SubItems[ColumnToSort].Text,""))/24)).ToString();
-//	        	}
-//	        	if(listviewY.SubItems[ColumnToSort].Text.Contains("hours")) {
-//	        		listviewY.SubItems[ColumnToSort].Text = ((float)(Int32.Parse(rgx.Replace(listviewY.SubItems[ColumnToSort].Text,""))/24)).ToString();
-//	        	}
-	        	if(listviewX.SubItems[ColumnToSort].Text.Contains("hours") && !listviewY.SubItems[ColumnToSort].Text.Contains("hours")) {
+        	} else {
+	        	if(time_words.IsMatch(listviewX.SubItems[ColumnToSort].Text) && !time_words.IsMatch(listviewY.SubItems[ColumnToSort].Text)) {
 	        		compareResult = ObjectCompare.Compare (
 	        			(float)(Int32.Parse(rgx.Replace(listviewX.SubItems[ColumnToSort].Text,""))/100),
 	        			(float)Int32.Parse(rgx.Replace(listviewY.SubItems[ColumnToSort].Text,""))
 			        );
-	        	} else if(listviewY.SubItems[ColumnToSort].Text.Contains("hours") && !listviewX.SubItems[ColumnToSort].Text.Contains("hours")) {
+	        	} else if(time_words.IsMatch(listviewY.SubItems[ColumnToSort].Text) && !time_words.IsMatch(listviewX.SubItems[ColumnToSort].Text)) {
 	        		compareResult = ObjectCompare.Compare (
 	        			(float)Int32.Parse(rgx.Replace(listviewX.SubItems[ColumnToSort].Text,"")),
 	        			(float)(Int32.Parse(rgx.Replace(listviewY.SubItems[ColumnToSort].Text,""))/100)
 			        );
-	        	} else if(listviewX.SubItems[ColumnToSort].Text.Contains("hours") && listviewY.SubItems[ColumnToSort].Text.Contains("hours")) {
+	        	} else if(time_words.IsMatch(listviewX.SubItems[ColumnToSort].Text) && time_words.IsMatch(listviewY.SubItems[ColumnToSort].Text)) {
 	        		compareResult = ObjectCompare.Compare (
 	        			Int32.Parse(rgx.Replace(listviewX.SubItems[ColumnToSort].Text,"")),
 	        			Int32.Parse(rgx.Replace(listviewY.SubItems[ColumnToSort].Text,""))

@@ -64,6 +64,8 @@ namespace JobSearchInterface
 		private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem instructionsStripMenuItem;
+		private System.Windows.Forms.ToolTip toolTip1;
 		
 		/// <summary>
 		/// Disposes resources used by the form.
@@ -86,6 +88,7 @@ namespace JobSearchInterface
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.searchButton = new System.Windows.Forms.Button();
 			this.searchQueryText = new System.Windows.Forms.TextBox();
@@ -136,7 +139,9 @@ namespace JobSearchInterface
 			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.instructionsStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			((System.ComponentModel.ISupportInitialize)(this.numericPostAge)).BeginInit();
 			this.tabBox.SuspendLayout();
 			this.searchsettingsTab.SuspendLayout();
@@ -164,6 +169,7 @@ namespace JobSearchInterface
 			this.searchQueryText.Name = "searchQueryText";
 			this.searchQueryText.Size = new System.Drawing.Size(99, 20);
 			this.searchQueryText.TabIndex = 0;
+			this.toolTip1.SetToolTip(this.searchQueryText, "ex. physiotherapist");
 			this.searchQueryText.KeyDown += new System.Windows.Forms.KeyEventHandler(this.sendEnterKey);
 			// 
 			// searchProgress
@@ -184,11 +190,13 @@ namespace JobSearchInterface
 			this.numericPostAge.Name = "numericPostAge";
 			this.numericPostAge.Size = new System.Drawing.Size(100, 20);
 			this.numericPostAge.TabIndex = 6;
+			this.toolTip1.SetToolTip(this.numericPostAge, "how long ago the ad was posted");
 			this.numericPostAge.Value = new decimal(new int[] {
 			30,
 			0,
 			0,
 			0});
+			this.numericPostAge.KeyDown += new System.Windows.Forms.KeyEventHandler(this.sendEnterKey);
 			// 
 			// jobsiteCombo
 			// 
@@ -196,14 +204,13 @@ namespace JobSearchInterface
 			this.jobsiteCombo.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
 			this.jobsiteCombo.FormattingEnabled = true;
 			this.jobsiteCombo.Items.AddRange(new object[] {
-			"Indeed",
-			"Monster",
-			"SimplyHired",
-			"Workopolis"});
+			"Indeed"});
 			this.jobsiteCombo.Location = new System.Drawing.Point(135, 29);
 			this.jobsiteCombo.Name = "jobsiteCombo";
 			this.jobsiteCombo.Size = new System.Drawing.Size(100, 21);
 			this.jobsiteCombo.TabIndex = 1;
+			this.toolTip1.SetToolTip(this.jobsiteCombo, "which job search resource?");
+			this.jobsiteCombo.KeyDown += new System.Windows.Forms.KeyEventHandler(this.sendEnterKey);
 			// 
 			// label1
 			// 
@@ -211,7 +218,7 @@ namespace JobSearchInterface
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(100, 23);
 			this.label1.TabIndex = 5;
-			this.label1.Text = "Search (ex. nurse)";
+			this.label1.Text = "Search";
 			this.label1.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
 			// label2
@@ -291,24 +298,26 @@ namespace JobSearchInterface
 			// numericLimit
 			// 
 			this.numericLimit.Increment = new decimal(new int[] {
-			10,
+			25,
 			0,
 			0,
 			0});
 			this.numericLimit.Location = new System.Drawing.Point(7, 138);
 			this.numericLimit.Maximum = new decimal(new int[] {
-			1000,
+			500,
 			0,
 			0,
 			0});
 			this.numericLimit.Name = "numericLimit";
 			this.numericLimit.Size = new System.Drawing.Size(100, 20);
 			this.numericLimit.TabIndex = 8;
+			this.toolTip1.SetToolTip(this.numericLimit, "the number of ads shown");
 			this.numericLimit.Value = new decimal(new int[] {
 			100,
 			0,
 			0,
 			0});
+			this.numericLimit.KeyDown += new System.Windows.Forms.KeyEventHandler(this.sendEnterKey);
 			// 
 			// debugCheck
 			// 
@@ -327,6 +336,7 @@ namespace JobSearchInterface
 			this.emailCheck.Size = new System.Drawing.Size(104, 24);
 			this.emailCheck.TabIndex = 9;
 			this.emailCheck.Text = "check for email";
+			this.toolTip1.SetToolTip(this.emailCheck, "scan postings for an email address for direct contact?");
 			this.emailCheck.UseVisualStyleBackColor = true;
 			// 
 			// label9
@@ -353,6 +363,8 @@ namespace JobSearchInterface
 			this.jobtypeBox.Name = "jobtypeBox";
 			this.jobtypeBox.Size = new System.Drawing.Size(100, 21);
 			this.jobtypeBox.TabIndex = 5;
+			this.toolTip1.SetToolTip(this.jobtypeBox, "fulltime, part time, contract, temporary, internship");
+			this.jobtypeBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.sendEnterKey);
 			// 
 			// label8
 			// 
@@ -375,6 +387,8 @@ namespace JobSearchInterface
 			this.sitetypeBox.Name = "sitetypeBox";
 			this.sitetypeBox.Size = new System.Drawing.Size(99, 21);
 			this.sitetypeBox.TabIndex = 4;
+			this.toolTip1.SetToolTip(this.sitetypeBox, "jobsite for job boards, employer for direct employers");
+			this.sitetypeBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.sendEnterKey);
 			// 
 			// label7
 			// 
@@ -459,6 +473,7 @@ namespace JobSearchInterface
 			this.countryCombo.Name = "countryCombo";
 			this.countryCombo.Size = new System.Drawing.Size(100, 21);
 			this.countryCombo.TabIndex = 3;
+			this.countryCombo.KeyDown += new System.Windows.Forms.KeyEventHandler(this.sendEnterKey);
 			// 
 			// label6
 			// 
@@ -485,11 +500,13 @@ namespace JobSearchInterface
 			this.numericSearchRadius.Name = "numericSearchRadius";
 			this.numericSearchRadius.Size = new System.Drawing.Size(100, 20);
 			this.numericSearchRadius.TabIndex = 7;
+			this.toolTip1.SetToolTip(this.numericSearchRadius, "distance from your chosen location");
 			this.numericSearchRadius.Value = new decimal(new int[] {
 			25,
 			0,
 			0,
 			0});
+			this.numericSearchRadius.KeyDown += new System.Windows.Forms.KeyEventHandler(this.sendEnterKey);
 			// 
 			// label5
 			// 
@@ -725,15 +742,23 @@ namespace JobSearchInterface
 			// helpToolStripMenuItem
 			// 
 			this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.instructionsStripMenuItem,
 			this.aboutToolStripMenuItem});
 			this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
 			this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
 			this.helpToolStripMenuItem.Text = "&Help";
 			// 
+			// instructionsStripMenuItem
+			// 
+			this.instructionsStripMenuItem.Name = "instructionsStripMenuItem";
+			this.instructionsStripMenuItem.Size = new System.Drawing.Size(134, 22);
+			this.instructionsStripMenuItem.Text = "How to use";
+			this.instructionsStripMenuItem.Click += new System.EventHandler(this.howtouseHelp);
+			// 
 			// aboutToolStripMenuItem
 			// 
 			this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
 			this.aboutToolStripMenuItem.Text = "&About...";
 			this.aboutToolStripMenuItem.Click += new System.EventHandler(this.showAboutBox);
 			// 

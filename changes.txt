@@ -1,0 +1,7 @@
+v2.5.3
+----------------
+- upgraded to .NET 4.5 to avoid malware blocking by Win10
+- cleaned up interface
+- added demo functionality
+- hovers everywhere
+- todo: rethink enter key on all inputs

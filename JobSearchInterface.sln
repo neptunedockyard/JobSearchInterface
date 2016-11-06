@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 # SharpDevelop 5.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobSearchInterface", "JobSearchInterface\JobSearchInterface.csproj", "{E9E9B30B-79AB-4B7F-94BE-5DE9924E6E43}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobSearchInterface(dotNet4.5)", "JobSearchInterface\JobSearchInterface(dotNet4.5).csproj", "{E9E9B30B-79AB-4B7F-94BE-5DE9924E6E43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

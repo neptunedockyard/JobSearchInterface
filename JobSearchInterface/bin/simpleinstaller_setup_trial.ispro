@@ -1,0 +1,42 @@
+; InstallSimple project
+
+[Setup]
+WindowTitle=Jobula - Job Search Tool
+ProductName=Jobula
+
+[Graphics]
+SplashScreen=
+SplashScreenDelay=3
+Header=
+HeaderJustify=Right
+HeaderFontColor=0
+WizardBitmap=
+WizardFontColor=0
+
+[FirstMessage]
+
+[LastMessage]
+Thank you for using our software.
+
+[LicenseAgreement]
+
+[SetupFiles]
+SourceFolder=C:\Users\Michal\Documents\SharpDevelop Projects\JobSearchInterface(dotNet4.5)\JobSearchInterface\bin\Release
+SpecialFolder=Program Files
+SetupPath=Jobula
+SetupFile=C:\Users\Michal\Documents\SharpDevelop Projects\JobSearchInterface(dotNet4.5)\JobSearchInterface\bin\Jobula_Installer_2.5.3_Trial.exe
+
+[Shortcuts]
+ProgramGroup=
+JobulaTrial.exe=dmp
+
+[Registry]
+
+[Requirements]
+OperatingSystem=WinAll
+NetFramework=4.0
+NetFrameworkLink=http://www.microsoft.com/en-us/download/details.aspx?id=17718
+AdminRights=0
+
+[AfterInstalling]
+Reboot=0
